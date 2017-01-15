@@ -109,16 +109,17 @@ public class Scanner {
 
             if(newToken.matches("[A-Z]+[0-9]*[A-Z]*")){
                 atom = new Atom<String>(Token.LITERAL, newToken);
-                System.out.println("literal:" + newToken);
+//                System.out.println("literal:" + newToken);
             }else if(newToken.matches("[0-9]+")){
                 atom = new Atom<Integer>(Token.NUMERIC, Integer.parseInt(newToken));
-                System.out.println("numeric:" + newToken);
+//                System.out.println("numeric:" + newToken);
             }else if(newToken.matches("[0-9]+[A-Z]+")){
                 atom = new Atom<String>(Token.ERROR, newToken);
-                System.out.println("error digits followed by numebr: " + newToken);
-            }else{
-                System.out.println("unknown error" + newToken);
+//                System.out.println("error digits followed by numebr: " + newToken);
             }
+//            else{
+//                System.out.println("unknown error" + newToken);
+//            }
 
         }
         return atom;
