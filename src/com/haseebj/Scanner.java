@@ -125,8 +125,8 @@ public class Scanner {
     public static void main(String[] args) throws IOException{
 	// write your code here
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        List literals = new ArrayList<String>();
-        List numerics = new ArrayList<Integer>();
+        List <String> literals = new ArrayList<String>();
+        List <Integer> numerics = new ArrayList<Integer>();
         int numLiterals          = 0,
             numNumerics          = 0,
             numOpenParenthesis   = 0,
@@ -139,11 +139,11 @@ public class Scanner {
 
             switch (atom.type){
                 case LITERAL:
-                    literals.add(atom.value);
+                    literals.add((String)atom.value);
                     numLiterals +=1;
                     break;
                 case NUMERIC:
-                    numerics.add(atom.value);
+                    numerics.add((Integer)atom.value);
                     numNumerics +=1;
                     break;
                 case OPEN_PARENTHESIS:
