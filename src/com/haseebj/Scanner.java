@@ -1,6 +1,7 @@
 package com.haseebj;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -68,14 +69,17 @@ public class Scanner {
     static boolean isWhiteSpace(char token){
         return token == 32 || token == 13 || token == 10;
     }
+    static boolean isEndOfFile(char token){
+        return token == '\uFFFF';
+    }
 
     public static Atom getNextToken (BufferedReader in) throws IOException {
         char token = (char)in.read();
 
-        System.out.println("Token: " + (int)token);
+//        System.out.println("Token: " + (int)token);
 //        in.mark(5);
-        Atom atom = new Atom<String>(Token.ERROR, Character.toString(token));
-        if(Token.EOF.equals(token)){
+        Atom atom = new Atom<String>(Token.ERROR, Integer.toString((int)token));
+        if(isEndOfFile(token)){
             atom = new Atom<String>(Token.EOF);
         }
         if(isWhiteSpace(token)) {
@@ -84,7 +88,7 @@ public class Scanner {
                 in.mark(5);
                 token = (char)in.read();
             }
-            if(Token.EOF.equals(token)){
+            if(isEndOfFile(token)){
                 atom = new Atom<String>(Token.EOF);
             }
         }
@@ -124,27 +128,24 @@ public class Scanner {
 
     public static void main(String[] args) throws IOException{
 	// write your code here
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+//        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        BufferedReader in = new BufferedReader(new FileReader("inputFile"));
         List <String> literals = new ArrayList<String>();
         List <Integer> numerics = new ArrayList<Integer>();
-        int numLiterals          = 0,
-            numNumerics          = 0,
-            numOpenParenthesis   = 0,
+        int numOpenParenthesis   = 0,
             numClosingParehtisis = 0;
 
 
         Atom atom = getNextToken(in);
-        while(atom.equals(Token.EOF) == false &&  atom.equals(Token.ERROR) == false){
+        while(atom.getType().equals(Token.EOF) == false &&  atom.getType().equals(Token.ERROR) == false){
 //            Token currentToken = atom.type;
 
             switch (atom.type){
                 case LITERAL:
                     literals.add((String)atom.value);
-                    numLiterals +=1;
                     break;
                 case NUMERIC:
                     numerics.add((Integer)atom.value);
-                    numNumerics +=1;
                     break;
                 case OPEN_PARENTHESIS:
                     numOpenParenthesis +=1;
@@ -153,7 +154,7 @@ public class Scanner {
                     numClosingParehtisis +=1;
                     break;
                 case ERROR:
-                    System.out.println("ERROR: Invalid token " + atom.value);
+                    System.out.println("ERROR: Invalid token " + Integer.getInteger((String)atom.value));
                     return;
 
             }
@@ -162,9 +163,9 @@ public class Scanner {
         }
 
 
-        System.out.print("LITERAL ATOMS: " + literals.size());//+ literals);
-        System.out.println(literals.toString());
-        System.out.println("NUMERIC ATOMS: " + numerics.size());
+        System.out.println("LITERAL ATOMS: " + literals.size() + ", " +
+                literals.toString().substring(1, literals.toString().length()-1));
+        System.out.println("NUMERIC ATOMS: " + numerics.size() +", " + numerics.stream().reduce(0, (a,b) -> a + b));
         System.out.println("OPEN PARENTHESES: " + numOpenParenthesis);
         System.out.println("CLOSING PARENTHESES: " + numClosingParehtisis);
 
