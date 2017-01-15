@@ -126,8 +126,8 @@ public class Scanner {
 
     public static void main(String[] args) throws IOException{
 	// write your code here
-//        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        BufferedReader in = new BufferedReader(new FileReader("inputFile"));
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+//        BufferedReader in = new BufferedReader(new FileReader("inputFile"));
         List <String> literals = new ArrayList<String>();
         List <Integer> numerics = new ArrayList<Integer>();
         int numOpenParenthesis   = 0,
