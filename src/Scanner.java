@@ -5,7 +5,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-enum Token {
+enum TokenType {
     LITERAL(1),
     NUMERIC(2),
     OPEN_PARENTHESIS('('),
@@ -14,25 +14,25 @@ enum Token {
     ERROR(5);
 
     private int value;
-    Token(int value){
+    TokenType(int value){
         this.value=value;
     }
 }
 
-class Atom <T> {
-    Token type;
+class Token<T> {
+    TokenType type;
     T value;
 
-    Atom(Token type, T value){
+    Token(TokenType type, T value){
         this.type = type;
         this.value = value;
     }
-    Atom(Token type){
+    Token(TokenType type){
         this.type = type;
         this.value = null;
     }
 
-    public Token getType(){
+    public TokenType getType(){
         return this.type;
     }
 
@@ -43,12 +43,25 @@ class Atom <T> {
 
 }
 
-public class Scanner {
+public final class Scanner {
 
+    static Token current;
+    static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+
+//    static BufferedReader in ;
+//    static {
+//        try{
+//            in =  new BufferedReader(new FileReader("inputFile"));
+//        }catch (Exception e){
+//            System.out.println(e);
+//        }
+//
+//    }
 
 
     static final int UPPER_CASE_A = 65;
     static final int UPPER_CASE_Z = 96;
+
 
     static boolean isDigit(char token){
         return Character.isDigit(token);
@@ -64,6 +77,10 @@ public class Scanner {
         return (token >= UPPER_CASE_A && token <= UPPER_CASE_Z );
     }
 
+    public static Token getCurrent (){
+        return current;
+    }
+
     static boolean isWhiteSpace(char token){
         return token == 32 || token == 13 || token == 10;
     }
@@ -71,102 +88,110 @@ public class Scanner {
         return token == '\uFFFF';
     }
 
-    public static Atom getNextToken (BufferedReader in) throws IOException {
-        char token = (char)in.read();
+    static void moveToNext() {
+        if(!current.getType().equals(TokenType.ERROR)){
+            current = getNextToken();
+        }
 
-//        System.out.println("Token: " + (int)token);
-//        in.mark(5);
-        Atom atom = new Atom<String>(Token.ERROR, Integer.toString((int)token));
-        if(isEndOfFile(token)){
-            atom = new Atom<String>(Token.EOF);
-        }
-        if(isWhiteSpace(token)) {
-//            token = (char)in.read();
-            while(isWhiteSpace(token) ){
-                in.mark(5);
-                token = (char)in.read();
-            }
-            if(isEndOfFile(token)){
-                atom = new Atom<String>(Token.EOF);
-            }
-        }
-        if(isOpenParenthesis(token)){
-            atom = new Atom<String>(Token.OPEN_PARENTHESIS);
-        }
-        if(isClosingParenthesis(token)){
-            atom = new Atom<String>(Token.CLOSING_PARENTHESIS);
-        }
-        if(isDigit((char)token) || isUpperCaseLetter(token)){
-            StringBuilder sb = new StringBuilder();
+    }
 
-            while(isDigit(token) || isUpperCaseLetter(token)){
-                sb.append(token);
-                in.mark(5);
-                token = (char)in.read();
-            }
-            in.reset();
-            String newToken = sb.toString();
+    public static Token getNextToken (){
 
-            if(newToken.matches("[A-Z]+[0-9]*[A-Z]*")){
-                atom = new Atom<String>(Token.LITERAL, newToken);
-//                System.out.println("literal:" + newToken);
-            }else if(newToken.matches("[0-9]+")){
-                atom = new Atom<Integer>(Token.NUMERIC, Integer.parseInt(newToken));
-//                System.out.println("numeric:" + newToken);
-            }else if(newToken.matches("[0-9]+[A-Z]+")){
-                atom = new Atom<String>(Token.ERROR, newToken);
-//                System.out.println("error digits followed by numebr: " + newToken);
+        try {
+            char currentChar = (char)in.read();
+            Token token = new Token<String>(TokenType.ERROR, ""+currentChar);
+            if(isEndOfFile(currentChar)){
+                token = new Token<String>(TokenType.EOF);
             }
-//            else{
-//                System.out.println("unknown error" + newToken);
+            if(isWhiteSpace(currentChar)) {
+                while(isWhiteSpace(currentChar) ){
+                    in.mark(5);
+                    currentChar = (char)in.read();
+                }
+                if(isEndOfFile(currentChar)){
+                    token = new Token<String>(TokenType.EOF);
+                }
+            }
+            if(isOpenParenthesis(currentChar)){
+                token = new Token<String>(TokenType.OPEN_PARENTHESIS);
+            }
+            if(isClosingParenthesis(currentChar)){
+                token = new Token<String>(TokenType.CLOSING_PARENTHESIS);
+            }
+            if(isDigit((char)currentChar) || isUpperCaseLetter(currentChar)){
+                StringBuilder sb = new StringBuilder();
+
+                while(isDigit(currentChar) || isUpperCaseLetter(currentChar)){
+                    sb.append(currentChar);
+                    in.mark(5);
+                    currentChar = (char)in.read();
+                }
+                in.reset();
+                String newToken = sb.toString();
+
+                if(newToken.matches("[A-Z]+[0-9]*[A-Z]*")){
+                    token = new Token<String>(TokenType.LITERAL, newToken);
+                }else if(newToken.matches("[0-9]+")){
+                    token = new Token<Integer>(TokenType.NUMERIC, Integer.parseInt(newToken));
+                }else //(newToken.matches("[0-9]+[A-Z]+")){
+                {
+                    token = new Token<String>(TokenType.ERROR, newToken);
+                }
+
+
+            }
+            return token;
+        }catch(IOException e){
+            System.out.println(e);
+
+        }
+        return null;
+    }
+
+    public static void init(){
+        current = getNextToken();
+    }
+
+//    public static void main(String[] args){
+//
+////        BufferedReader in = new BufferedReader(new FileReader("inputFile"));
+//        List <String> literals = new ArrayList<String>();
+//        List <Integer> numerics = new ArrayList<Integer>();
+//        int numOpenParenthesis   = 0,
+//            numClosingParehtisis = 0;
+//
+//
+//        Token token = Scanner.getNextToken();
+//        while(token.getType().equals(TokenType.EOF) == false &&  token.getType().equals(TokenType.ERROR) == false){
+//
+//            switch (token.type){
+//                case LITERAL:
+//                    literals.add((String) token.value);
+//                    break;
+//                case NUMERIC:
+//                    numerics.add((Integer) token.value);
+//                    break;
+//                case OPEN_PARENTHESIS:
+//                    numOpenParenthesis +=1;
+//                    break;
+//                case CLOSING_PARENTHESIS:
+//                    numClosingParehtisis +=1;
+//                    break;
+//                case ERROR:
+//                    System.out.println("ERROR: Invalid token " + Integer.getInteger((String) token.value));
+//                    return;
+//
 //            }
-
-        }
-        return atom;
-    }
-
-    public static void main(String[] args) throws IOException{
-	// write your code here
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-//        BufferedReader in = new BufferedReader(new FileReader("inputFile"));
-        List <String> literals = new ArrayList<String>();
-        List <Integer> numerics = new ArrayList<Integer>();
-        int numOpenParenthesis   = 0,
-            numClosingParehtisis = 0;
-
-
-        Atom atom = getNextToken(in);
-        while(atom.getType().equals(Token.EOF) == false &&  atom.getType().equals(Token.ERROR) == false){
-//            Token currentToken = atom.type;
-
-            switch (atom.type){
-                case LITERAL:
-                    literals.add((String)atom.value);
-                    break;
-                case NUMERIC:
-                    numerics.add((Integer)atom.value);
-                    break;
-                case OPEN_PARENTHESIS:
-                    numOpenParenthesis +=1;
-                    break;
-                case CLOSING_PARENTHESIS:
-                    numClosingParehtisis +=1;
-                    break;
-                case ERROR:
-                    System.out.println("ERROR: Invalid token " + Integer.getInteger((String)atom.value));
-                    return;
-
-            }
-            atom = getNextToken(in);
-
-        }
-
-
-        System.out.println("LITERAL ATOMS: " + literals.size() + ", " +
-                literals.toString().substring(1, literals.toString().length()-1));
-        System.out.println("NUMERIC ATOMS: " + numerics.size() +", " + numerics.stream().reduce(0, (a,b) -> a + b));
-        System.out.println("OPEN PARENTHESES: " + numOpenParenthesis);
-        System.out.println("CLOSING PARENTHESES: " + numClosingParehtisis);
-
-    }
+//            token = getNextToken();
+//
+//        }
+//
+//
+//        System.out.println("LITERAL ATOMS: " + literals.size() + ", " +
+//                literals.toString().substring(1, literals.toString().length() - 1));
+//        System.out.println("NUMERIC ATOMS: " + numerics.size() +", " + numerics.stream().reduce(0, (a, b) -> a + b));
+//        System.out.println("OPEN PARENTHESES: " + numOpenParenthesis);
+//        System.out.println("CLOSING PARENTHESES: " + numClosingParehtisis);
+//
+//    }
 }
