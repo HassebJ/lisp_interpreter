@@ -1,4 +1,3 @@
-import java.util.*;
 
 /**
  * Created by mac on 1/20/17.
@@ -6,8 +5,6 @@ import java.util.*;
 class BTreeImpl {
     Node root;
     Node insertPtr;
-    Queue<Node> queue;
-    Node lastNodeOnRequiredPath;
 
     public BTreeImpl (){
         root = new Node();
@@ -26,34 +23,36 @@ class BTreeImpl {
             insertPtr.leftNode.parent = insertPtr.rightNode.parent = insertPtr;
             insertPtr = insertPtr.rightNode;
         }
-
-
-
     }
 
     void insertNilAndMoveLevelUp(){
         Node parentInsertPtr = insertPtr.parent;
+//        //if insertPtr points to root
+        if(insertPtr == root){
+            root = new Node ("NIL");
+            return;
+        }
         if(insertPtr.leftNode != null && insertPtr.rightNode != null){
             insertPtr = parentInsertPtr.parent.rightNode;
             insertNilAndMoveLevelUp();
-        }
-        if(parentInsertPtr.rightNode == insertPtr) {
+
+        }else if(parentInsertPtr.rightNode == insertPtr) {
             insertPtr = new Node("NIL");
             insertPtr.parent = parentInsertPtr;
             parentInsertPtr.rightNode = insertPtr;
-//        insertPtr.leftNode.parent = insertPtr.rightNode.parent = insertPtr;
+
             if(parentInsertPtr == parentInsertPtr.parent.leftNode){
                 insertPtr = parentInsertPtr.parent.rightNode;
             }else{
-                insertPtr = parentInsertPtr.parent;
+                while(insertPtr.parent.rightNode == insertPtr){
+                    insertPtr = insertPtr.parent;
+                }
+                insertPtr = insertPtr.parent.rightNode;
             }
-
-        }else{
+        }else{//parentInsertPtr.leftNode == insertPtr
             insertPtr = new Node("NIL");
             insertPtr.parent = parentInsertPtr;
             parentInsertPtr.leftNode = insertPtr;
-//            parentInsertPtr.rightNode = new Node("NIL");
-//        insertPtr.leftNode.parent = insertPtr.rightNode.parent = insertPtr;
             insertPtr = parentInsertPtr.rightNode;
         }
     }
