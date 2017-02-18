@@ -1,1 +1,1 @@
-(DEFUN F23 (X) (PLUS X 12 55))
+(CONS 1(CONS 2 (CONS 3 (CONS 4 5))))

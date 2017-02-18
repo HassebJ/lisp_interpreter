@@ -1,8 +1,17 @@
-import java.text.ParseException;
+import java.util.*;
 
 /**
  * Created by mac on 1/20/17.
  */
+class ParserException extends Exception{
+    String message;
+    ParserException(String str2) {
+        message = str2;
+    }
+    public String toString(){
+        return ("ParserException : " + message ) ;
+    }
+}
 
 public class Parser {
 
@@ -10,7 +19,15 @@ public class Parser {
 
     public static void dotPrint(Node node){
         if(node.leftNode == null || node.rightNode == null){
-            System.out.print(node.value);
+            Object printValue;
+            if(node.token instanceof Token){
+                Token token = (Token) node.token;
+                printValue = token.getValue();
+            }else{
+                printValue = node.token;
+            }
+
+            System.out.print(printValue);
         }else{
             System.out.print("(");
 //            if (node.leftNode != null) {
@@ -24,23 +41,30 @@ public class Parser {
         }
     }
 
-    public static void prettyPrint(){
-        dotPrint(bTree.root);
+    public static void prettyPrint(BTreeImpl btree){
+        dotPrint(btree.root);
+        System.out.println();
 
     }
 
-    public static void parseStart(){
+    public static void reset (){
+        bTree = new BTreeImpl();
+    }
+
+    public static List parseStart () throws ParserException{
+        List <BTreeImpl> bTreeList = new ArrayList<>();
+
         do{
             parseExpr();
             if(Scanner.getCurrent().getType().equals(TokenType.ERROR)){
-                System.out.println("ERROR: Unrecognized token " + Scanner.getCurrent().getValue());
-                return;
+                throw new ParserException("ERROR: Unrecognized token " + Scanner.getCurrent().getValue());
             }
-            prettyPrint();
-            System.out.println();
-            bTree = new BTreeImpl();
+            prettyPrint(bTree);
+            bTreeList.add(bTree);
+            reset();
 
         }while(!Scanner.getCurrent().getType().equals(TokenType.EOF));
+        return bTreeList;
     }
     public static void parseExpr(){
         Token currentToken = Scanner.getCurrent();
@@ -48,7 +72,7 @@ public class Parser {
             return;
         }
         if(currentToken.getType().equals(TokenType.NUMERIC) || currentToken.getType().equals(TokenType.LITERAL)){
-            bTree.insertNode(currentToken.getValue());
+            bTree.insertNode(currentToken);
             Scanner.moveToNext();
             //add a new node with token as left child and right as nil, which will be insertion point for next insert
 
@@ -73,7 +97,12 @@ public class Parser {
 
     public static void main (String [] args){
         Scanner.init();
-        parseStart();
+        try{
+            parseStart();
+        }catch (Exception e){
+            System.out.println(e);
+        }
+
 
     }
 

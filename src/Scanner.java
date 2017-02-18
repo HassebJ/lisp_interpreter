@@ -13,7 +13,7 @@ enum TokenType {
     EOF(-1),
     ERROR(5);
 
-    private int value;
+    int value;
     TokenType(int value){
         this.value=value;
     }
@@ -31,6 +31,25 @@ class Token<T> {
         this.type = type;
         this.value = null;
     }
+    public boolean equalsVal(T val){
+        if(this.value.equals(val)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    public boolean equalsType(TokenType val){
+        if(this.type.equals(val)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+//
+//    public  Object toString(){
+//        return token;
+//    }
 
     public TokenType getType(){
         return this.type;
@@ -46,18 +65,18 @@ class Token<T> {
 public final class Scanner {
 
     static Token current;
-    static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+//    static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-    //hardcoded input file for debugging purposes
-//    static BufferedReader in ;
-//    static {
-//        try{
-//            in =  new BufferedReader(new FileReader("inputFile"));
-//        }catch (Exception e){
-//            System.out.println(e);
-//        }
-//
-//    }
+//    //hardcoded input file for debugging purposes
+    static BufferedReader in ;
+    static {
+        try{
+            in =  new BufferedReader(new FileReader("inputFile"));
+        }catch (Exception e){
+            System.out.println(e);
+        }
+
+    }
 
 
     static final int UPPER_CASE_A = 65;
@@ -167,10 +186,10 @@ public final class Scanner {
 //
 //            switch (token.type){
 //                case LITERAL:
-//                    literals.add((String) token.value);
+//                    literals.add((String) token.token);
 //                    break;
 //                case NUMERIC:
-//                    numerics.add((Integer) token.value);
+//                    numerics.add((Integer) token.token);
 //                    break;
 //                case OPEN_PARENTHESIS:
 //                    numOpenParenthesis +=1;
@@ -179,7 +198,7 @@ public final class Scanner {
 //                    numClosingParehtisis +=1;
 //                    break;
 //                case ERROR:
-//                    System.out.println("ERROR: Invalid token " + Integer.getInteger((String) token.value));
+//                    System.out.println("ERROR: Invalid token " + Integer.getInteger((String) token.token));
 //                    return;
 //
 //            }

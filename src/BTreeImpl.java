@@ -12,7 +12,39 @@ class BTreeImpl {
         root.parent = root;
     }
 
-    void insertNode(Object val) {
+    public int length(){
+        Node countPtr = root;
+        int count = 0;
+        while (countPtr.token.equalsVal("NIL") == false ){
+            count ++;
+            countPtr = countPtr.rightNode;
+        }
+        return count;
+    }
+
+    public boolean equals(BTreeImpl newBtree){
+        if(root.token.equalsVal(newBtree.root.token.value) || root.token.equalsType(newBtree.root.token.getType())){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public boolean equalsTokenVal(Token token){
+        if(root.token.equalsVal(token.value) ){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    public BTreeImpl(Node r){
+        root = r;
+        insertPtr = root;
+        root.parent = root;
+    }
+
+    void insertNode(Token val) {
         /* TO DO */
 
         if(root.leftNode == null){
@@ -29,7 +61,7 @@ class BTreeImpl {
         Node parentInsertPtr = insertPtr.parent;
 //        //if insertPtr points to root
         if(insertPtr == root){
-            root = new Node ("NIL");
+            root = new Node(new Token(TokenType.LITERAL,"NIL"));
             return;
         }
         if(insertPtr.leftNode != null && insertPtr.rightNode != null){
@@ -37,7 +69,7 @@ class BTreeImpl {
             insertNilAndMoveLevelUp();
 
         }else if(parentInsertPtr.rightNode == insertPtr) {
-            insertPtr = new Node("NIL");
+            insertPtr = new Node(new Token(TokenType.LITERAL,"NIL"));
             insertPtr.parent = parentInsertPtr;
             parentInsertPtr.rightNode = insertPtr;
 
@@ -50,7 +82,7 @@ class BTreeImpl {
                 insertPtr = insertPtr.parent.rightNode;
             }
         }else{//parentInsertPtr.leftNode == insertPtr
-            insertPtr = new Node("NIL");
+            insertPtr = new Node(new Token(TokenType.LITERAL,"NIL"));
             insertPtr.parent = parentInsertPtr;
             parentInsertPtr.leftNode = insertPtr;
             insertPtr = parentInsertPtr.rightNode;
@@ -71,20 +103,20 @@ class BTreeImpl {
 
 
 class Node{
-    Object value;
+    Token token;
     Node leftNode;
     Node rightNode;
     Node parent;
 
     public Node(){
-        value = "-";
+        token = new Token(TokenType.LITERAL,"-");
         leftNode = null;
         rightNode = null;
         parent = null;
     }
 
-    public Node(Object val){
-        value = val;
+    public Node(Token val){
+        token = val;
         leftNode = null;
         rightNode = null;
         parent = null;
