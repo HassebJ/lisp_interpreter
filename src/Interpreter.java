@@ -1,5 +1,6 @@
 import java.lang.reflect.Method;
 import java.util.*;
+//import Scanner
 
 /**
  * Created by mac on 2/13/17.
@@ -13,7 +14,7 @@ class UndefinedSExpressionException extends Exception{
         return ("UndefinedSExpressionException : " + message ) ;
     }
 }
-
+@SuppressWarnings("unchecked")
 public class Interpreter {
 
     void listPrint(Node currentNode){
@@ -46,6 +47,7 @@ public class Interpreter {
     }
     void prettyPrint(BTreeImpl input){
         listPrint(input.root);
+        System.out.println();
     }
 
 
@@ -106,16 +108,16 @@ public class Interpreter {
     public BTreeImpl eq (BTreeImpl s1, BTreeImpl s2) throws UndefinedSExpressionException{
 //        Node root = input.root;
         if(s1.root.leftNode == null && s1.root.rightNode == null && s2.root.leftNode == null && s2.root.rightNode == null ) {
-            Token tokenS1 = (Token)s1.root.token;
-            Token tokenS2 = (Token)s2.root.token;
+            Token tokenS1 = s1.root.token;
+            Token tokenS2 = s2.root.token;
             if ( tokenS1.getType().equals(TokenType.NUMERIC) && tokenS2.getType().equals(TokenType.NUMERIC) &&
                     tokenS1.getValue().equals(tokenS2.getValue())) {
-                return new BTreeImpl(new Node(new Token(TokenType.LITERAL, "T")));
+                return new BTreeImpl(new Node(new Token<String>(TokenType.LITERAL, "T")));
             }else if ( tokenS1.getType().equals(TokenType.LITERAL) && tokenS2.getType().equals(TokenType.LITERAL) &&
                     tokenS1.getValue().equals(tokenS2.getValue())) {
-                return new BTreeImpl(new Node(new Token(TokenType.LITERAL, "T")));
+                return new BTreeImpl(new Node(new Token<String>(TokenType.LITERAL, "T")));
             }else{
-                return new BTreeImpl(new Node(new Token(TokenType.LITERAL, "NIL")));
+                return new BTreeImpl(new Node(new Token<String>(TokenType.LITERAL, "NIL")));
             }
 
         }else{
@@ -143,8 +145,8 @@ public class Interpreter {
     public BTreeImpl minus (BTreeImpl s1, BTreeImpl s2) throws UndefinedSExpressionException {
 //        Node root = input.root;
 
-        Token tokenS1 = (Token) s1.root.token;
-        Token tokenS2 = (Token) s2.root.token;
+        Token tokenS1 =  s1.root.token;
+        Token tokenS2 = s2.root.token;
         if (tokenS1.getType().equals(TokenType.NUMERIC) && tokenS2.getType().equals(TokenType.NUMERIC)) {
             int diff = (int) tokenS1.getValue() - (int) tokenS2.getValue();
             return new BTreeImpl(new Node(new Token(TokenType.NUMERIC, diff)));
@@ -156,11 +158,11 @@ public class Interpreter {
     public BTreeImpl times (BTreeImpl s1, BTreeImpl s2) throws UndefinedSExpressionException {
 //        Node root = input.root;
 
-        Token tokenS1 = (Token) s1.root.token;
-        Token tokenS2 = (Token) s2.root.token;
+        Token tokenS1 =  s1.root.token;
+        Token tokenS2 = s2.root.token;
         if (tokenS1.getType().equals(TokenType.NUMERIC) && tokenS2.getType().equals(TokenType.NUMERIC)) {
             int prod = (int) tokenS1.getValue() * (int) tokenS2.getValue();
-            return new BTreeImpl(new Node(new Token(TokenType.NUMERIC, prod)));
+            return new BTreeImpl(new Node(new Token<Integer>(TokenType.NUMERIC, prod)));
         } else {
             throw new UndefinedSExpressionException("Atleast one of the input S-Expressions is not NUMERIC.");
         }
@@ -331,7 +333,7 @@ public class Interpreter {
                 }
                 currentCondBranch = cdr(currentCondBranch);
             }
-            throw new UndefinedSExpressionException("Expected S-Expression to be a LIST of 2 tokens");
+            throw new UndefinedSExpressionException("None of the sub-conditions of COND evaluate to T");
 
 
         }

@@ -59,7 +59,7 @@ public class Parser {
             if(Scanner.getCurrent().getType().equals(TokenType.ERROR)){
                 throw new ParserException("ERROR: Unrecognized token " + Scanner.getCurrent().getValue());
             }
-            prettyPrint(bTree);
+//            prettyPrint(bTree);
             bTreeList.add(bTree);
             reset();
 

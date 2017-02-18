@@ -2,6 +2,7 @@
 /**
  * Created by mac on 1/20/17.
  */
+@SuppressWarnings("unchecked")
 class BTreeImpl {
     Node root;
     Node insertPtr;
@@ -101,7 +102,7 @@ class BTreeImpl {
 
 }
 
-
+@SuppressWarnings("unchecked")
 class Node{
     Token token;
     Node leftNode;
