@@ -1,6 +1,1 @@
-(COND ((EQ 1 2) NIL) ((EQ 1 1) T) )
-(COND ((ATOM 1) NIL) ((EQ 1 1) T) )
-(ATOM (CONS 4 5))
-(COND ((NULL (CONS 4 5 )) NIL) ((EQ 1 9) (PLUS 4 9)) ((ATOM (PLUS 4 5)) (CONS 1(CONS 2 (CONS 3 (CONS 4 5)))) ) )
-(QUOTE(PLUS 4 5))
-(COND ((NULL (CONS 4 5 )) NIL) ((EQ 1 9) (PLUS 4 9)) ((CONS (QUOTE(PLUS 4 5)) (QUOTE(PLUS 4 5))) (CONS 1(CONS 2 (CONS 3 (CONS 4 5)))) ) )
+(QUOTE (3 4 5))
