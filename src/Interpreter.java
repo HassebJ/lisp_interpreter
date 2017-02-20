@@ -239,7 +239,7 @@ public class Interpreter {
                         return (BTreeImpl)method.invoke(this, s1, s2);
 //                        return (BTreeImpl)method.invoke(this, new Object[]{s1, s2});
                     } catch (Exception e) {
-                        System.out.println(e);
+                        throw new UndefinedSExpressionException(e.getCause().toString().substring(e.getCause().toString().indexOf(":")+1));
                     }
                 }else{
                     throw new UndefinedSExpressionException("Expected ATOM to be of type Numeric");
@@ -278,7 +278,7 @@ public class Interpreter {
                     return (BTreeImpl)method.invoke(this, s1);
 //                        return (BTreeImpl)method.invoke(this, new Object[]{s1, s2});
                 } catch (Exception e) {
-                    System.out.println(e);
+                    throw new UndefinedSExpressionException(e.getCause().toString().substring(e.getCause().toString().indexOf(":")+1));
                 }
             }else{
                 throw new UndefinedSExpressionException("Expected S-Expression to contain 2 tokens");
@@ -294,11 +294,13 @@ public class Interpreter {
                         Method method = this.getClass().getDeclaredMethod(methodName, BTreeImpl.class);
                         return (BTreeImpl)method.invoke(this, s1);
                     } catch (Exception e) {
-                        System.out.println(e);
+                        throw new UndefinedSExpressionException(e.getCause().toString().substring(e.getCause().toString().indexOf(":")+1));
+//
                     }
                 }else{
+                    throw new UndefinedSExpressionException("Expected S-Expression to be not an atom");
                 }
-                throw new UndefinedSExpressionException("Expected S-Expression to be not an atom");
+
             }
         }
         else if (isTokenFunc(carOfInput, "CONS")) {
@@ -324,7 +326,7 @@ public class Interpreter {
                 BTreeImpl currentCond = car(currentCondBranch);
                 if(currentCond.length() == 2){
                     BTreeImpl resultCurrentCond = eval(car(currentCond));
-                    if(isTokenT(resultCurrentCond.root.token)){
+                    if(isTokenNIL(resultCurrentCond.root.token) == false){
                         BTreeImpl stmtCurrentCond = car(cdr(car(currentCondBranch)));
                         return eval(stmtCurrentCond);
                     }
