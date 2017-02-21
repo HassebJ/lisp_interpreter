@@ -31,12 +31,14 @@ public class Interpreter {
 
 
             }
-            listPrint(currentNode.leftNode);
-            System.out.print(" ");
+
             //else{
                 if(isTokenNIL(rightChildOfCurrentNode.token)){
+                    listPrint(currentNode.leftNode);
                     System.out.print(")");
                 }else{
+                    listPrint(currentNode.leftNode);
+                    System.out.print(" ");
                     System.out.print(". ");
                     System.out.print(rightChildOfCurrentNode.token.getValue());
                     System.out.print(")");
