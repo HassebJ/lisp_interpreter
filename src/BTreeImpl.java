@@ -13,6 +13,16 @@ class BTreeImpl {
         root.parent = root;
     }
 
+    public BTreeImpl(Node r){
+        root = r;
+        insertPtr = root;
+        root.parent = root;
+    }
+
+    public static BTreeImpl getTree(String val){
+        return new BTreeImpl(new Node(new Token(TokenType.LITERAL, val)));
+    }
+
     public int length(){
         Node countPtr = root;
         int count = 0;
@@ -37,12 +47,6 @@ class BTreeImpl {
         }else{
             return false;
         }
-    }
-
-    public BTreeImpl(Node r){
-        root = r;
-        insertPtr = root;
-        root.parent = root;
     }
 
     void insertNode(Token val) {

@@ -17,6 +17,13 @@ class UndefinedSExpressionException extends Exception{
 @SuppressWarnings("unchecked")
 public class Interpreter {
 
+
+    BTreeImpl dlist;
+
+    public Interpreter(){
+        dlist = BTreeImpl.getTree("NIL");
+    }
+
     void listPrint(Node currentNode){
         if(currentNode.leftNode == null && currentNode.rightNode == null){
             System.out.print(currentNode.token.getValue());
@@ -60,6 +67,20 @@ public class Interpreter {
         }
         return new BTreeImpl(root.leftNode);
     }
+
+    BTreeImpl caar(BTreeImpl input) throws UndefinedSExpressionException{
+        return car(car(input));
+    }
+
+    BTreeImpl cadr(BTreeImpl input) throws UndefinedSExpressionException{
+        return car(cdr(input));
+    }
+
+    BTreeImpl cddr(BTreeImpl input) throws UndefinedSExpressionException{
+        return cdr(cdr(input));
+    }
+
+
     BTreeImpl cdr(BTreeImpl input) throws UndefinedSExpressionException{
         Node root = input.root;
         if(root.leftNode == null && root.rightNode == null){
@@ -157,6 +178,34 @@ public class Interpreter {
         }
     }
 
+    public BTreeImpl bound(BTreeImpl x, BTreeImpl y) throws UndefinedSExpressionException{
+        if(isTokenNIL(y.root.token)){
+            return BTreeImpl.getTree("NIL");
+        }
+        if(isTokenT(eq(x, caar(y)).root.token)){
+            return eq(x, caar(y));
+        }
+        return bound(x, cdr(y));
+    }
+
+    public BTreeImpl getVal(BTreeImpl x, BTreeImpl y) throws UndefinedSExpressionException{
+        if(isTokenT(eq(x, caar(y)).root.token)){
+            return cdr(car(y));
+        }
+        return getVal(x, cdr(y));
+    }
+
+    public BTreeImpl evlist(BTreeImpl x, BTreeImpl a) throws UndefinedSExpressionException{
+        if(isTokenT(null_(x).root.token)){
+            return new BTreeImpl(new Node(new Token(TokenType.LITERAL, "NIL")));
+        }
+        return cons(eval(car(x), a), evlist(cdr(x), a));
+    }
+
+    public BTreeImpl addPairs(BTreeImpl xList, BTreeImpl yList, BTreeImpl z) throws UndefinedSExpressionException{
+        return addPairs(cdr(xList), cdr(yList), cons(cons(caar(xList), caar(yList)), z));
+    }
+
     public BTreeImpl times (BTreeImpl s1, BTreeImpl s2) throws UndefinedSExpressionException {
 //        Node root = input.root;
 
@@ -217,103 +266,21 @@ public class Interpreter {
         return input.root.token.equalsVal(funcName);
     }
 
-    BTreeImpl eval(BTreeImpl input) throws UndefinedSExpressionException{
+    BTreeImpl eval(BTreeImpl input, BTreeImpl alist) throws UndefinedSExpressionException{
+        if(isTokenT(atom_(input).root.token)){
         Node root = input.root;
-        if (isTokenT(root.token) || isTokenNIL(root.token) || isTokenT(int_(input).root.token)) {
-            return input;
+            if (isTokenT(root.token) || isTokenNIL(root.token) || isTokenT(int_(input).root.token)) {
+                return input;
+            }else if (isTokenT(bound(input,alist).root.token)){
+                return getVal(input, alist);
+            }else{
+                throw new UndefinedSExpressionException("Unbound literal.");
+            }
         }
+
         BTreeImpl carOfInput =  car(input);
-        if(isTokenFunc(carOfInput, "PLUS")
-                || isTokenFunc(car(input), "MINUS")
-                || isTokenFunc(car(input), "TIMES")
-                || isTokenFunc(car(input), "TIMES")
-                || isTokenFunc(car(input), "GREATER")
-                || isTokenFunc(car(input), "LESS")){
-            if(input.length() == 3) {
 
-                BTreeImpl s1 = eval(car(cdr(input)));
-                BTreeImpl s2 = eval(car(cdr(cdr(input))));
-
-                if(isTokenType(s1.root.token, TokenType.NUMERIC) && isTokenType(s2.root.token, TokenType.NUMERIC)) {
-                    String methodName = carOfInput.root.token.getValue().toString().toLowerCase();
-                    try {
-                        Method method = this.getClass().getMethod(methodName, BTreeImpl.class, BTreeImpl.class);
-                        return (BTreeImpl)method.invoke(this, s1, s2);
-//                        return (BTreeImpl)method.invoke(this, new Object[]{s1, s2});
-                    } catch (Exception e) {
-                        throw new UndefinedSExpressionException(e.getCause().toString().substring(e.getCause().toString().indexOf(":")+1));
-                    }
-                }else{
-                    throw new UndefinedSExpressionException("Expected ATOM to be of type Numeric");
-                }
-
-            }else{
-                throw new UndefinedSExpressionException("Expected S-Expression to contain 3 tokens");
-            }
-
-        }
-        else if (isTokenFunc(carOfInput, "EQ")) {
-
-            if(input.length() == 3){
-                BTreeImpl s1 = eval(car(cdr(input)));
-                BTreeImpl s2 = eval(car(cdr(cdr(input))));
-
-                if(isTokenType(s1.root.token, TokenType.NUMERIC) || isTokenType(s1.root.token, TokenType.LITERAL)
-                        && isTokenType(s2.root.token, TokenType.NUMERIC) || isTokenType(s2.root.token, TokenType.LITERAL)) {
-                    return eq(s1, s2);
-                }else{
-                    throw new UndefinedSExpressionException("At least one S-Expression is not an atom");
-                }
-            }else{
-                throw new UndefinedSExpressionException("Expected S-Expression to contain 2 tokens");
-            }
-        }
-        else if(isTokenFunc(carOfInput, "ATOM")
-                || isTokenFunc(car(input), "INT")
-                || isTokenFunc(car(input), "NULL")){
-            if(input.length() == 2){
-                BTreeImpl s1 = eval(car(cdr(input)));
-//                BTreeImpl s2 = eval(car(cdr(cdr(input))));
-                String methodName = carOfInput.root.token.getValue().toString().toLowerCase() + "_";
-                try {
-                    Method method = this.getClass().getMethod(methodName, BTreeImpl.class);
-                    return (BTreeImpl)method.invoke(this, s1);
-//                        return (BTreeImpl)method.invoke(this, new Object[]{s1, s2});
-                } catch (Exception e) {
-                    throw new UndefinedSExpressionException(e.getCause().toString().substring(e.getCause().toString().indexOf(":")+1));
-                }
-            }else{
-                throw new UndefinedSExpressionException("Expected S-Expression to contain 2 tokens");
-            }
-        }
-        else if(isTokenFunc(carOfInput, "CAR")
-                || isTokenFunc(car(input), "CDR")){
-            if(input.length() == 2){
-                BTreeImpl s1 = eval(car(cdr(input)));
-                if(isTokenType(s1.root.token, TokenType.NUMERIC) || isTokenType(s1.root.token, TokenType.LITERAL)){
-                    String methodName = carOfInput.root.token.getValue().toString().toLowerCase();
-                    try {
-                        Method method = this.getClass().getDeclaredMethod(methodName, BTreeImpl.class);
-                        return (BTreeImpl)method.invoke(this, s1);
-                    } catch (Exception e) {
-                        throw new UndefinedSExpressionException(e.getCause().toString().substring(e.getCause().toString().indexOf(":")+1));
-//
-                    }
-                }else{
-                    throw new UndefinedSExpressionException("Expected S-Expression to be not an atom");
-                }
-
-            }
-        }
-        else if (isTokenFunc(carOfInput, "CONS")) {
-            if(input.length() == 3){
-                BTreeImpl s1 = eval(car(cdr(input)));
-                BTreeImpl s2 = eval(car(cdr(cdr(input))));
-                return cons(s1,s2);
-            }else{
-                throw new UndefinedSExpressionException("Expected S-Expression to contain 3 tokens");
-            }
-        }else if(isTokenFunc(carOfInput, "QUOTE")){
+        if(isTokenFunc(carOfInput, "QUOTE")){
 
             if(input.length() == 2){
                 return car(cdr(input));
@@ -327,10 +294,10 @@ public class Interpreter {
             while(isTokenNIL(currentCondBranch.root.token) == false){
                 BTreeImpl currentCond = car(currentCondBranch);
                 if(currentCond.length() == 2){
-                    BTreeImpl resultCurrentCond = eval(car(currentCond));
+                    BTreeImpl resultCurrentCond = eval(car(currentCond), alist);
                     if(isTokenNIL(resultCurrentCond.root.token) == false){
                         BTreeImpl stmtCurrentCond = car(cdr(car(currentCondBranch)));
-                        return eval(stmtCurrentCond);
+                        return eval(stmtCurrentCond, alist);
                     }
                 }else{
                     throw new UndefinedSExpressionException("Expected S-Expression to be a LIST of 2 tokens");
@@ -340,8 +307,156 @@ public class Interpreter {
             throw new UndefinedSExpressionException("None of the sub-conditions of COND evaluate to T");
 
 
+        }else if(isTokenFunc(carOfInput, "DEFUN")){
+            BTreeImpl funName = cadr(input);
+            if(!isReservedLiteral(funName)){
+                BTreeImpl formalsList = car(cddr(input));
+                if(isTokenNIL(atom_(formalsList).root.token)){
+                    ArrayList<String> formalsEncountered = new ArrayList<String>();
+                    BTreeImpl currentFormalNode = formalsList;
+                    while(!isTokenNIL(currentFormalNode.root.token)){
+//                        String currentFormalLiteral = (String)currentFormalNode.token.value;
+                        BTreeImpl currentFormal = car(currentFormalNode);
+                        if(!isReservedLiteral(currentFormal) && !formalsEncountered.contains((String)currentFormal.root.token.value)){
+                            dlist = cons(cdr(input), dlist);
+                            System.out.println(funName.root.token.value);
+                        }else{
+                            throw new UndefinedSExpressionException("Duplicate formal or formal is a reserved literal");
+                        }
+                        currentFormalNode = cdr(currentFormalNode);
+                    }
+
+                }else{
+                    throw new UndefinedSExpressionException("Expected formals to be a list");
+                }
+
+
+            }else{
+                throw new UndefinedSExpressionException("Function name is a reserved literal");
+            }
+
+
+            return apply(car(input), evlist(cdr(input), alist), alist);
+//                addPairs()
+        }else{
+           return apply(car(input), evlist(cdr(input), alist), alist);
         }
-        throw new UndefinedSExpressionException("Unexpected S-Expression.");
+
+    }
+
+    boolean isReservedLiteral(BTreeImpl literal){
+        String reserved = new String("T, NIL, CAR, CDR, CONS, ATOM, EQ, NULL, INT, PLUS, MINUS, TIMES, LESS, GREATER, COND, QUOTE, DEFUN");
+        for( String reserve : reserved.split(",")){
+            if(reserve.equals(literal.root.token.value)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    BTreeImpl apply(BTreeImpl input, BTreeImpl x, BTreeImpl alist) throws UndefinedSExpressionException{
+
+        BTreeImpl carOfInput =  car(input);
+        if(isTokenT(atom_(carOfInput).root.token)){
+            if(isTokenFunc(carOfInput, "PLUS")
+                    || isTokenFunc(car(input), "MINUS")
+                    || isTokenFunc(car(input), "TIMES")
+                    || isTokenFunc(car(input), "TIMES")
+                    || isTokenFunc(car(input), "GREATER")
+                    || isTokenFunc(car(input), "LESS")){
+                if(input.length() == 3) {
+
+                    BTreeImpl s1 = eval(car(cdr(input)), alist);
+                    BTreeImpl s2 = eval(car(cdr(cdr(input))), alist);
+
+                    if(isTokenType(s1.root.token, TokenType.NUMERIC) && isTokenType(s2.root.token, TokenType.NUMERIC)) {
+                        String methodName = carOfInput.root.token.getValue().toString().toLowerCase();
+                        try {
+                            Method method = this.getClass().getMethod(methodName, BTreeImpl.class, BTreeImpl.class);
+                            return (BTreeImpl)method.invoke(this, s1, s2);
+//                        return (BTreeImpl)method.invoke(this, new Object[]{s1, s2});
+                        } catch (Exception e) {
+                            throw new UndefinedSExpressionException(e.getCause().toString().substring(e.getCause().toString().indexOf(":")+1));
+                        }
+                    }else{
+                        throw new UndefinedSExpressionException("Expected ATOM to be of type Numeric");
+                    }
+
+                }else{
+                    throw new UndefinedSExpressionException("Expected S-Expression to contain 3 tokens");
+                }
+
+            }
+            else if (isTokenFunc(carOfInput, "EQ")) {
+
+                if(input.length() == 3){
+                    BTreeImpl s1 = eval(car(cdr(input)), alist);
+                    BTreeImpl s2 = eval(car(cdr(cdr(input))), alist);
+
+                    if(isTokenType(s1.root.token, TokenType.NUMERIC) || isTokenType(s1.root.token, TokenType.LITERAL)
+                            && isTokenType(s2.root.token, TokenType.NUMERIC) || isTokenType(s2.root.token, TokenType.LITERAL)) {
+                        return eq(s1, s2);
+                    }else{
+                        throw new UndefinedSExpressionException("At least one S-Expression is not an atom");
+                    }
+                }else{
+                    throw new UndefinedSExpressionException("Expected S-Expression to contain 2 tokens");
+                }
+            }
+            else if(isTokenFunc(carOfInput, "ATOM")
+                    || isTokenFunc(car(input), "INT")
+                    || isTokenFunc(car(input), "NULL")){
+                if(input.length() == 2){
+                    BTreeImpl s1 = eval(car(cdr(input)), alist);
+//                BTreeImpl s2 = eval(car(cdr(cdr(input))));
+                    String methodName = carOfInput.root.token.getValue().toString().toLowerCase() + "_";
+                    try {
+                        Method method = this.getClass().getMethod(methodName, BTreeImpl.class);
+                        return (BTreeImpl)method.invoke(this, s1);
+//                        return (BTreeImpl)method.invoke(this, new Object[]{s1, s2});
+                    } catch (Exception e) {
+                        throw new UndefinedSExpressionException(e.getCause().toString().substring(e.getCause().toString().indexOf(":")+1));
+                    }
+                }else{
+                    throw new UndefinedSExpressionException("Expected S-Expression to contain 2 tokens");
+                }
+            }
+            else if(isTokenFunc(carOfInput, "CAR")
+                    || isTokenFunc(car(input), "CDR")){
+                if(input.length() == 2){
+                    BTreeImpl s1 = eval(car(cdr(input)), alist);
+                    if(isTokenType(s1.root.token, TokenType.NUMERIC) || isTokenType(s1.root.token, TokenType.LITERAL)){
+                        String methodName = carOfInput.root.token.getValue().toString().toLowerCase();
+                        try {
+                            Method method = this.getClass().getDeclaredMethod(methodName, BTreeImpl.class);
+                            return (BTreeImpl)method.invoke(this, s1);
+                        } catch (Exception e) {
+                            throw new UndefinedSExpressionException(e.getCause().toString().substring(e.getCause().toString().indexOf(":")+1));
+//
+                        }
+                    }else{
+                        throw new UndefinedSExpressionException("Expected S-Expression to be not an atom");
+                    }
+
+                }
+            }
+            else if (isTokenFunc(carOfInput, "CONS")) {
+                if(input.length() == 3){
+                    BTreeImpl s1 = eval(car(cdr(input)), alist);
+                    BTreeImpl s2 = eval(car(cdr(cdr(input))), alist);
+                    return cons(s1,s2);
+                }else{
+                    throw new UndefinedSExpressionException("Expected S-Expression to contain 3 tokens");
+                }
+            }else{
+                eval (cdr( getVal(carOfInput,dlist) ),
+                        addPairs( car(getVal(carOfInput,dlist)), x, alist)
+                         );
+            }
+        }
+
+        throw new UndefinedSExpressionException("Expected atomic expression, found non-atomic");
+
     }
 
     public static void main (String [] args){
@@ -349,8 +464,9 @@ public class Interpreter {
         Interpreter intrprtr = new Interpreter();
         try{
             List <BTreeImpl> bTreeList = Parser.parseStart();
+            BTreeImpl aList = new BTreeImpl(new Node(new Token(TokenType.LITERAL, "NIL")));
             for(BTreeImpl btr : bTreeList){
-                BTreeImpl expToPrint = intrprtr.eval(btr);
+                BTreeImpl expToPrint = intrprtr.eval(btr, aList);
 //                Parser.prettyPrint(expToPrint);
                 intrprtr.prettyPrint(expToPrint);
             }
