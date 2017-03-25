@@ -18,6 +18,10 @@ class BTreeImpl {
         insertPtr = root;
         root.parent = root;
     }
+    @Override
+    public String toString(){
+        return (String)root.token.value;
+    }
 
     public static BTreeImpl getTree(String val){
         return new BTreeImpl(new Node(new Token(TokenType.LITERAL, val)));

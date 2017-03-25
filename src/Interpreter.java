@@ -199,11 +199,16 @@ public class Interpreter {
         if(isTokenT(null_(x).root.token)){
             return new BTreeImpl(new Node(new Token(TokenType.LITERAL, "NIL")));
         }
-        return cons(eval(car(x), a), evlist(cdr(x), a));
+        BTreeImpl firstParam = eval(car(x), a);
+        BTreeImpl secondParam = evlist(cdr(x), a);
+        return cons(firstParam, secondParam);
     }
 
     public BTreeImpl addPairs(BTreeImpl xList, BTreeImpl yList, BTreeImpl z) throws UndefinedSExpressionException{
-        return addPairs(cdr(xList), cdr(yList), cons(cons(caar(xList), caar(yList)), z));
+        if(isTokenT(null_(xList).root.token)){
+            return z;
+        }
+        return addPairs(cdr(xList), cdr(yList), cons(cons(car(xList), car(yList)), z));
     }
 
     public BTreeImpl times (BTreeImpl s1, BTreeImpl s2) throws UndefinedSExpressionException {
@@ -309,22 +314,26 @@ public class Interpreter {
 
         }else if(isTokenFunc(carOfInput, "DEFUN")){
             BTreeImpl funName = cadr(input);
+            // check if function name is a reserved literal
             if(!isReservedLiteral(funName)){
                 BTreeImpl formalsList = car(cddr(input));
+                // check if formals are in a list
                 if(isTokenNIL(atom_(formalsList).root.token)){
                     ArrayList<String> formalsEncountered = new ArrayList<String>();
                     BTreeImpl currentFormalNode = formalsList;
+                    // iterate through all formals
                     while(!isTokenNIL(currentFormalNode.root.token)){
 //                        String currentFormalLiteral = (String)currentFormalNode.token.value;
                         BTreeImpl currentFormal = car(currentFormalNode);
-                        if(!isReservedLiteral(currentFormal) && !formalsEncountered.contains((String)currentFormal.root.token.value)){
-                            dlist = cons(cdr(input), dlist);
-                            System.out.println(funName.root.token.value);
-                        }else{
+                        // make sure formal is not reserved or not duplicate
+                        if(isReservedLiteral(currentFormal) || formalsEncountered.contains((String)currentFormal.root.token.value)){
                             throw new UndefinedSExpressionException("Duplicate formal or formal is a reserved literal");
                         }
+                        formalsEncountered.add((String)currentFormal.root.token.value);
                         currentFormalNode = cdr(currentFormalNode);
                     }
+                    dlist = cons(cdr(input), dlist);
+                    return BTreeImpl.getTree((String)funName.root.token.value);
 
                 }else{
                     throw new UndefinedSExpressionException("Expected formals to be a list");
@@ -334,18 +343,15 @@ public class Interpreter {
             }else{
                 throw new UndefinedSExpressionException("Function name is a reserved literal");
             }
-
-
-            return apply(car(input), evlist(cdr(input), alist), alist);
-//                addPairs()
+        // handle the case for token corresponding to a function name (potentially)
         }else{
-           return apply(car(input), evlist(cdr(input), alist), alist);
+           return apply(input, evlist(cdr(input), alist), alist);
         }
 
     }
 
     boolean isReservedLiteral(BTreeImpl literal){
-        String reserved = new String("T, NIL, CAR, CDR, CONS, ATOM, EQ, NULL, INT, PLUS, MINUS, TIMES, LESS, GREATER, COND, QUOTE, DEFUN");
+        String reserved = new String("T,NIL,CAR,CDR,CONS,ATOM,EQ,NULL,INT,PLUS,MINUS,TIMES,LESS,GREATER,COND,QUOTE,DEFUN");
         for( String reserve : reserved.split(",")){
             if(reserve.equals(literal.root.token.value)){
                 return true;
@@ -448,14 +454,25 @@ public class Interpreter {
                 }else{
                     throw new UndefinedSExpressionException("Expected S-Expression to contain 3 tokens");
                 }
+            }else if(isTokenT(bound(carOfInput, dlist).root.token)){
+
+                BTreeImpl getValOutput = getVal(carOfInput, dlist);
+                if(car(getValOutput).length() == x.length()){
+
+                    BTreeImpl functionBody = cadr(getValOutput);
+                    BTreeImpl functionArguments = addPairs(car(getValOutput), x, alist);
+                    return eval ( functionBody , functionArguments);
+                }else{
+                    throw new UndefinedSExpressionException("Function " +  carOfInput.toString()+ " called with different number of actuals compared to formals");
+                }
+
             }else{
-                eval (cdr( getVal(carOfInput,dlist) ),
-                        addPairs( car(getVal(carOfInput,dlist)), x, alist)
-                         );
+                throw new UndefinedSExpressionException("Function " +  carOfInput.toString()+ " is not defined");
             }
+
         }
 
-        throw new UndefinedSExpressionException("Expected atomic expression, found non-atomic");
+        throw new UndefinedSExpressionException("Expected function name to be an atomic literal, found non-atomic");
 
     }
 
