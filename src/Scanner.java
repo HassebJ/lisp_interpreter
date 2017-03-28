@@ -69,7 +69,7 @@ public final class Scanner {
     static Token prev;
 
     static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-
+//
 ////    //hardcoded input file for debugging purposes
 //    static BufferedReader in ;
 //    static {

@@ -324,18 +324,20 @@ public class Interpreter {
             if(!isReservedLiteral(funName) && isTokenNIL(int_(funName).root.token)){
                 BTreeImpl formalsList = car(cddr(input));
                 // check if formals are in a list
-                if(isTokenNIL(atom_(formalsList).root.token) || formalsList.root.listRoot == true){
+                if(isTokenNIL((formalsList).root.token) || isTokenNIL(atom_(formalsList).root.token) || formalsList.root.listRoot == true){
                     ArrayList<String> formalsEncountered = new ArrayList<String>();
                     BTreeImpl currentFormalNode = formalsList;
                     // iterate through all formals
                     while(!isTokenNIL(currentFormalNode.root.token)){
-//                        String currentFormalLiteral = (String)currentFormalNode.token.value;
+//                        String currentFormalLiteral = (String)currentFormalNode.token.value.toString();
                         BTreeImpl currentFormal = car(currentFormalNode);
                         // make sure formal is not reserved or not duplicate
-                        if(isReservedLiteral(currentFormal) || formalsEncountered.contains((String)currentFormal.root.token.value)){
-                            throw new UndefinedSExpressionException("Duplicate formal or formal is a reserved literal");
+                        if(isReservedLiteral(currentFormal)
+                                || formalsEncountered.contains((String)currentFormal.root.token.value.toString())
+                                || isTokenT(int_(currentFormal).root.token)){
+                            throw new UndefinedSExpressionException("Duplicate formal or formal is a reserved literal or numeric");
                         }
-                        formalsEncountered.add((String)currentFormal.root.token.value);
+                        formalsEncountered.add((String)currentFormal.root.token.value.toString());
                         currentFormalNode = cdr(currentFormalNode);
                     }
                     dlist = cons(cdr(input), dlist);
