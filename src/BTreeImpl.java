@@ -20,7 +20,7 @@ class BTreeImpl {
     }
     @Override
     public String toString(){
-        return (String)root.token.value;
+        return (String)root.token.value.toString();
     }
 
     public static BTreeImpl getTree(String val){

@@ -86,6 +86,9 @@ public class Interpreter {
         if(root.leftNode == null && root.rightNode == null){
             throw new UndefinedSExpressionException("S-Expression contains only one node");
         }
+//        BTreeImpl newBtree = new BTreeImpl();
+//        newBtree.root = root.rightNode;
+//        return newBtree;
         return new BTreeImpl(root.rightNode);
     }
 
@@ -199,6 +202,7 @@ public class Interpreter {
         if(isTokenT(null_(x).root.token)){
             return new BTreeImpl(new Node(new Token(TokenType.LITERAL, "NIL")));
         }
+
         BTreeImpl firstParam = eval(car(x), a);
         BTreeImpl secondParam = evlist(cdr(x), a);
         return cons(firstParam, secondParam);
@@ -208,7 +212,9 @@ public class Interpreter {
         if(isTokenT(null_(xList).root.token)){
             return z;
         }
-        return addPairs(cdr(xList), cdr(yList), cons(cons(car(xList), car(yList)), z));
+        BTreeImpl updatedZ = addPairs(cdr(xList), cdr(yList),z);
+        return cons(cons(car(xList), car(yList)), updatedZ);
+//        return addPairs(cdr(xList), cdr(yList), cons(cons(car(xList), car(yList)), z));
     }
 
     public BTreeImpl times (BTreeImpl s1, BTreeImpl s2) throws UndefinedSExpressionException {
@@ -315,7 +321,7 @@ public class Interpreter {
         }else if(isTokenFunc(carOfInput, "DEFUN")){
             BTreeImpl funName = cadr(input);
             // check if function name is a reserved literal
-            if(!isReservedLiteral(funName)){
+            if(!isReservedLiteral(funName) && isTokenNIL(int_(funName).root.token)){
                 BTreeImpl formalsList = car(cddr(input));
                 // check if formals are in a list
                 if(isTokenNIL(atom_(formalsList).root.token)){
@@ -333,7 +339,7 @@ public class Interpreter {
                         currentFormalNode = cdr(currentFormalNode);
                     }
                     dlist = cons(cdr(input), dlist);
-                    return BTreeImpl.getTree((String)funName.root.token.value);
+                    return BTreeImpl.getTree((String)funName.root.token.value.toString());
 
                 }else{
                     throw new UndefinedSExpressionException("Expected formals to be a list");
@@ -341,7 +347,7 @@ public class Interpreter {
 
 
             }else{
-                throw new UndefinedSExpressionException("Function name is a reserved literal");
+                throw new UndefinedSExpressionException("Function name is a reserved literal or of numeric type.");
             }
         // handle the case for token corresponding to a function name (potentially)
         }else{
