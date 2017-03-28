@@ -66,7 +66,7 @@ class BTreeImpl {
         }
     }
 
-    void insertNilAndMoveLevelUp(){
+    void insertNilAndMoveLevelUp(boolean isEmptyList){
         Node parentInsertPtr = insertPtr.parent;
 //        //if insertPtr points to root
         if(insertPtr == root){
@@ -75,7 +75,7 @@ class BTreeImpl {
         }
         if(insertPtr.leftNode != null && insertPtr.rightNode != null){
             insertPtr = parentInsertPtr.parent.rightNode;
-            insertNilAndMoveLevelUp();
+            insertNilAndMoveLevelUp(isEmptyList);
 
         }else if(parentInsertPtr.rightNode == insertPtr) {
             insertPtr = new Node(new Token(TokenType.LITERAL,"NIL"));
@@ -92,6 +92,7 @@ class BTreeImpl {
             }
         }else{//parentInsertPtr.leftNode == insertPtr
             insertPtr = new Node(new Token(TokenType.LITERAL,"NIL"));
+            insertPtr.listRoot = isEmptyList;
             insertPtr.parent = parentInsertPtr;
             parentInsertPtr.leftNode = insertPtr;
             insertPtr = parentInsertPtr.rightNode;
@@ -116,6 +117,7 @@ class Node{
     Node leftNode;
     Node rightNode;
     Node parent;
+    boolean listRoot = false;
 
     public Node(){
         token = new Token(TokenType.LITERAL,"-");

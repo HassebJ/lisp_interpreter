@@ -23,6 +23,7 @@ class Token<T> {
     TokenType type;
     T value;
 
+
     Token(TokenType type, T value){
         this.type = type;
         this.value = value;
@@ -65,8 +66,10 @@ class Token<T> {
 public final class Scanner {
 
     static Token current;
+    static Token prev;
+
     static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-//
+
 ////    //hardcoded input file for debugging purposes
 //    static BufferedReader in ;
 //    static {
@@ -109,6 +112,7 @@ public final class Scanner {
     }
 
     static void moveToNext() {
+        prev = current;
         if(!current.getType().equals(TokenType.ERROR)){
             current = getNextToken();
         }

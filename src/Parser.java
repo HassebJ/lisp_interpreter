@@ -85,7 +85,13 @@ public class Parser {
                 parseExpr();
 
             }
-            bTree.insertNilAndMoveLevelUp();
+            if(Scanner.prev.equalsType(TokenType.OPEN_PARENTHESIS)){
+//                System.out.println("open close");
+                bTree.insertNilAndMoveLevelUp(true);
+            }else{
+                bTree.insertNilAndMoveLevelUp(false);
+            }
+
             //add this list of
             Scanner.moveToNext();
         }else{

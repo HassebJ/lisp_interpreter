@@ -324,7 +324,7 @@ public class Interpreter {
             if(!isReservedLiteral(funName) && isTokenNIL(int_(funName).root.token)){
                 BTreeImpl formalsList = car(cddr(input));
                 // check if formals are in a list
-                if(isTokenNIL(atom_(formalsList).root.token)){
+                if(isTokenNIL(atom_(formalsList).root.token) || formalsList.root.listRoot == true){
                     ArrayList<String> formalsEncountered = new ArrayList<String>();
                     BTreeImpl currentFormalNode = formalsList;
                     // iterate through all formals
