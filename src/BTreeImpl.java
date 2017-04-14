@@ -24,7 +24,7 @@ class BTreeImpl {
     }
 
     public boolean equals(BTreeImpl newBtree){
-        if(root.token.equalsVal(newBtree.root.token.value) || root.token.equalsType(newBtree.root.token.getType())){
+        if(root.token.equalsVal(newBtree.root.token.value)){
             return true;
         }else{
             return false;

@@ -22,21 +22,31 @@ enum TokenType {
 class Token<T> {
     TokenType type;
     T value;
+    Types abstractType = Types.LISTOFNATS;
 
     Token(TokenType type, T value){
         this.type = type;
         this.value = value;
+        if (type.equals(TokenType.NUMERIC)) {
+            this.abstractType = Types.NAT;
+        }else if(value.equals("F") || value.equals("T")) {
+            this.abstractType = Types.BOOL;
+        }
+
     }
+
+    Token(Types type, T value){
+        this.type = null;
+        this.value = value;
+        this.abstractType = type;
+    }
+
     Token(TokenType type){
         this.type = type;
         this.value = null;
     }
     public boolean equalsVal(T val){
-        if(this.value.equals(val)){
-            return true;
-        }else{
-            return false;
-        }
+        return this.value.equals(val);
     }
     public boolean equalsType(TokenType val){
         if(this.type.equals(val)){
@@ -46,6 +56,10 @@ class Token<T> {
         }
     }
 
+    public boolean equalsAbstractType(Types val){
+        return this.abstractType.equals(val);
+    }
+
 //
 //    public  Object toString(){
 //        return token;
@@ -53,6 +67,10 @@ class Token<T> {
 
     public TokenType getType(){
         return this.type;
+    }
+
+    public Types getAbstractType(){
+        return this.abstractType;
     }
 
     public T getValue(){
@@ -65,18 +83,18 @@ class Token<T> {
 public final class Scanner {
 
     static Token current;
-    static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+//    static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-////    //hardcoded input file for debugging purposes
-//    static BufferedReader in ;
-//    static {
-//        try{
-//            in =  new BufferedReader(new FileReader("inputFile"));
-//        }catch (Exception e){
-//            System.out.println(e);
-//        }
-//
-//    }
+//    //hardcoded input file for debugging purposes
+    static BufferedReader in ;
+    static {
+        try{
+            in =  new BufferedReader(new FileReader("inputFile"));
+        }catch (Exception e){
+            System.out.println(e);
+        }
+
+    }
 
 
     static final int UPPER_CASE_A = 65;

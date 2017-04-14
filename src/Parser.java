@@ -68,6 +68,7 @@ public class Parser {
     }
     public static void parseExpr(){
         Token currentToken = Scanner.getCurrent();
+
         if(currentToken.getType().equals(TokenType.ERROR)){
             return;
         }
@@ -78,14 +79,20 @@ public class Parser {
 
 
         }else if(Scanner.getCurrent().getType().equals(TokenType.OPEN_PARENTHESIS)) {
+            Node pointerToLastOpenParenthesis = bTree.insertPtr;
             Scanner.moveToNext();
             //keep on adding tokens to a list
             bTree.branchAndMoveLevelDown();
+            int count = 0;
             while (!Scanner.getCurrent().getType().equals(TokenType.CLOSING_PARENTHESIS) && !Scanner.getCurrent().getType().equals(TokenType.ERROR)) {
                 parseExpr();
+                count++;
 
             }
+            pointerToLastOpenParenthesis.token.value = count;
+            pointerToLastOpenParenthesis.token.abstractType = Types.LISTOFNATS;
             bTree.insertNilAndMoveLevelUp();
+
             //add this list of
             Scanner.moveToNext();
         }else{
