@@ -113,12 +113,12 @@ public class Interpreter {
         }
 
     }
-    BTreeImpl carDash(BTreeImpl input) throws TypeException {
+    BTreeImpl carDash(BTreeImpl input) throws ListException {
         Node root = input.root;
         if((int)root.token.value > 0 && equalsAbstractType(input, Types.LISTOFNATS)){
             return getTreeOfAbstractType(new Token(Types.NAT, "AnyInt"));
         }else{
-            throw new TypeException("CAR on empty list.");
+            throw new ListException("CAR on empty list.");
         }
 
     }
@@ -143,12 +143,12 @@ public class Interpreter {
         }
     }
 
-    BTreeImpl cdrDash(BTreeImpl input) throws TypeException {
+    BTreeImpl cdrDash(BTreeImpl input) throws ListException {
         Node root = input.root;
         if((int)root.token.value > 0 && equalsAbstractType(input, Types.LISTOFNATS)){
             return getTreeOfAbstractType(new Token(Types.LISTOFNATS, (int)root.token.getValue() - 1));
         }else{
-            throw new TypeException("CDR on empty list.");
+            throw new ListException("CDR on empty list.");
         }
     }
 
@@ -533,7 +533,7 @@ public class Interpreter {
 
     }
 
-    BTreeImpl evalDash(BTreeImpl input) throws TypeException {
+    BTreeImpl evalDash(BTreeImpl input) throws Exception {
         if(isTokenT(atom_(input).root.token)) {
 
             Node root = input.root;
@@ -631,7 +631,7 @@ public class Interpreter {
             List <BTreeImpl> bTreeList = Parser.parseStart();
             for(BTreeImpl btr : bTreeList){
                 BTreeImpl res = intrprtr.eval(btr);
-//                intrprtr.evalDash(btr);
+                intrprtr.evalDash(btr);
 //                Parser.prettyPrint(expToPrint);
                 intrprtr.prettyPrint(btr);
 //                intrprtr.prettyPrint(res);
