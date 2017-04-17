@@ -1,1 +1,13 @@
-(CAR(CONS 8 NIL))
+
+(INT (LESS 3 2))
+(CONS (CAR (CONS 1 NIL)) (CONS 2 NIL))
+(ATOM (COND ( (NULL (CDR (CONS 2 NIL))) (INT (CAR (CONS 3 ()))) ) (F (NULL NIL))) )
+
+
+
+
+(COND (F (CONS 8 (CONS 8 (CONS 8 NIL))))    ((INT 4) (CONS 8 (CONS 8 NIL))) ((NULL (CONS 2 NIL)) (CONS 8 (CONS 8 (CONS 8 (CONS 8 NIL))))))
+
+
+
+

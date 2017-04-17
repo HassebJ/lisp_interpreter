@@ -309,7 +309,7 @@ public class Interpreter {
             Token tokenS2 = s2.root.token;
 //            if ( tokenS1.getType().equals(TokenType.NUMERIC) && tokenS2.getType().equals(TokenType.NUMERIC) &&
 //                    tokenS1.getValue().equals(tokenS2.getValue())) {
-                return new BTreeImpl(new Node(new Token<String>(Types.NAT, null)));
+                return new BTreeImpl(new Node(new Token(Types.NAT, "AnyNat")));
 //            }else{
 //                return new BTreeImpl(new Node(new Token<String>(TokenType.LITERAL, "F")));
 //            }
@@ -364,7 +364,7 @@ public class Interpreter {
             Token tokenS2 = s2.root.token;
 //            if ( tokenS1.getType().equals(TokenType.NUMERIC) && tokenS2.getType().equals(TokenType.NUMERIC) &&
 //                    tokenS1.getValue().equals(tokenS2.getValue())) {
-            return new BTreeImpl(new Node(new Token<String>(Types.NAT, null)));
+            return new BTreeImpl(new Node(new Token(Types.NAT, "AnyNat")));
 //            }else{
 //                return new BTreeImpl(new Node(new Token<String>(TokenType.LITERAL, "F")));
 //            }
@@ -484,6 +484,7 @@ public class Interpreter {
                     }catch (TypeException e) {
                         throw e;
                     } catch (Exception e) {
+                        e.printStackTrace();
                         throw new TypeException(e.getCause().toString().substring(e.getCause().toString().indexOf(":") + 1));
                     }
                 } else {
@@ -594,7 +595,7 @@ public class Interpreter {
         }else if(isTokenFunc(carOfInput, "COND")){
 
             BTreeImpl currentCondBranch = cdr(input);
-            BTreeImpl stmtCurrentCond = car(cdr(car(currentCondBranch)));
+            BTreeImpl stmtCurrentCond = evalDash(car(cdr(car(currentCondBranch))));
             if(equalsAbstractType(stmtCurrentCond, Types.NAT)){
                 return getTreeOfAbstractType(new Token(Types.NAT, "AnyNat"));
             }else if (equalsAbstractType(stmtCurrentCond, Types.BOOL)){
@@ -631,10 +632,10 @@ public class Interpreter {
             List <BTreeImpl> bTreeList = Parser.parseStart();
             for(BTreeImpl btr : bTreeList){
                 BTreeImpl res = intrprtr.eval(btr);
-                intrprtr.evalDash(btr);
+                BTreeImpl dash = intrprtr.evalDash(btr);
 //                Parser.prettyPrint(expToPrint);
                 intrprtr.prettyPrint(btr);
-//                intrprtr.prettyPrint(res);
+//                intrprtr.prettyPrint(dash);
             }
         }catch (Exception e){
             e.printStackTrace();
