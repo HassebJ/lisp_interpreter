@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 enum TokenType {
     LITERAL(1),
     NUMERIC(2),
@@ -18,6 +20,7 @@ enum TokenType {
         this.value=value;
     }
 }
+//enum Types {NAT, BOOL, LISTOFNATS}
 
 class Token<T> {
     TokenType type;
@@ -76,7 +79,7 @@ class Token<T> {
 
 //
 //    public  Object toString(){
-//        return token;
+//        return toke
 //    }
 
     public TokenType getType(){

@@ -10,7 +10,7 @@ import java.util.*;
 /**
  * Created by mac on 2/13/17.
  */
-enum Types {NAT, BOOL, LISTOFNATS}
+
 class TypeException extends Exception{
     String message;
     TypeException(String str2) {
