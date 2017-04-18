@@ -1,13 +1,15 @@
-
-(INT (LESS 3 2))
+(CAR (CDR  (CONS 3 (CONS 5 () ))))
+(COND ((ATOM (CAR (CONS 5 NIL))) (CDR (CONS 3 NIL))) (T (CONS 6 (CONS 7 ()))))
+(CONS (CAR (CONS 6 (CONS 3 NIL))) (CONS 7 (CONS 8 NIL)))
+(COND (F 1) (F 2) (T (PLUS 2 2)))
+(CAR (CONS 8 ()))
+(COND (F (PLUS 2 3))    ((INT 4) 6) ((NULL (CONS 2 NIL)) 8)) 
+(ATOM (CAR (CONS 3 (CONS 4 NIL))))
+(COND ((EQ 12 22) NIL) ((INT (CAR(CONS 1 NIL))) 
+(CONS 8 (CONS 9 NIL))) ( (LESS 2 3) NIL))
+(CDR (CDR (CDR (CONS 1 (CONS 2 (CONS 3 NIL))))))
+(CONS (PLUS 2 (COND (F 1) (T 2))) NIL)
+(EQ (PLUS 1 (PLUS 2 4)) (PLUS 6 1)  )
+(ATOM (PLUS 2 2))  (INT (LESS 3 2)) 
 (CONS (CAR (CONS 1 NIL)) (CONS 2 NIL))
 (ATOM (COND ( (NULL (CDR (CONS 2 NIL))) (INT (CAR (CONS 3 ()))) ) (F (NULL NIL))) )
-
-
-
-
-(COND (F (CONS 8 (CONS 8 (CONS 8 NIL))))    ((INT 4) (CONS 8 (CONS 8 NIL))) ((NULL (CONS 2 NIL)) (CONS 8 (CONS 8 (CONS 8 (CONS 8 NIL))))))
-
-
-
-

@@ -32,6 +32,20 @@ class Token<T> {
         }else if(value.equals("F") || value.equals("T")) {
             this.abstractType = Types.BOOL;
         }
+//        else{
+//
+//            String reserved = new String("T,NIL,CAR,CDR,CONS,ATOM,EQ,NULL,INT,PLUS,MINUS,TIMES,LESS,GREATER,COND,QUOTE,DEFUN");
+//            boolean isReserved = false;
+//            for( String reserve : reserved.split(",")){
+//                if(reserve.equals(value)){
+//                    isReserved = true;
+//                }
+//            }
+//            if(isReserved == false){
+//
+//            }
+//
+//        }
 
     }
 
@@ -83,18 +97,18 @@ class Token<T> {
 public final class Scanner {
 
     static Token current;
-//    static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+    static BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
 //    //hardcoded input file for debugging purposes
-    static BufferedReader in ;
-    static {
-        try{
-            in =  new BufferedReader(new FileReader("inputFile"));
-        }catch (Exception e){
-            System.out.println(e);
-        }
-
-    }
+//    static BufferedReader in ;
+//    static {
+//        try{
+//            in =  new BufferedReader(new FileReader("inputFile"));
+//        }catch (Exception e){
+//            System.out.println(e);
+//        }
+//
+//    }
 
 
     static final int UPPER_CASE_A = 65;

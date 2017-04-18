@@ -16,7 +16,7 @@ class BTreeImpl {
     public int length(){
         Node countPtr = root;
         int count = 0;
-        while (countPtr.token.equalsVal("NIL") == false ){
+        while (countPtr != null && countPtr.token.equalsVal("NIL") == false  ){
             count ++;
             countPtr = countPtr.rightNode;
         }

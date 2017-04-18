@@ -2,6 +2,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 //import Scanner
@@ -174,15 +175,15 @@ public class Interpreter {
 
     }
     public BTreeImpl consDash(BTreeImpl s1, BTreeImpl s2)  throws TypeException {
-        if( equalsAbstractTypeAndValue(s1, Types.NAT, "AnyInt") &&  equalsAbstractType(s2, Types.LISTOFNATS)) {
+//        if( equalsAbstractTypeAndValue(s1, Types.NAT, "AnyInt") &&  equalsAbstractType(s2, Types.LISTOFNATS)) {
             if (s2.root.token.getValue() instanceof String) {
                 return getTreeOfAbstractType(new Token(Types.LISTOFNATS, 1));
             } else {
                 return getTreeOfAbstractType(new Token(Types.LISTOFNATS, (int) s2.root.token.getValue() + 1));
             }
-        }else{
-            throw new TypeException("S-Expressions are not of expected types");
-        }
+//        }else{
+//            throw new TypeException("S-Expressions are not of expected types");
+//        }
 
 
     }
@@ -210,9 +211,9 @@ public class Interpreter {
         Node root = input.root;
         String resultAtom = "NIL";
         if(equalsAbstractType(input, Types.LISTOFNATS)){
-            return getTreeOfAbstractType(new Token(Types.BOOL, "False"));
+            return getTreeOfAbstractType(new Token(Types.BOOL, "F"));
         }else{
-            return getTreeOfAbstractType(new Token(Types.BOOL, "True"));
+            return getTreeOfAbstractType(new Token(Types.BOOL, "T"));
         }
 
     }
@@ -241,7 +242,7 @@ public class Interpreter {
         if(equalsAbstractTypeAndValue(input, Types.LISTOFNATS, 0)){
             return getTreeOfAbstractType(new Token(Types.BOOL, "AnyBool"));
         }else{
-            return getTreeOfAbstractType(new Token(Types.BOOL, "False"));
+            return getTreeOfAbstractType(new Token(Types.BOOL, "F"));
         }
 
     }
@@ -266,9 +267,9 @@ public class Interpreter {
         Node root = input.root;
         String resultAtom = "NIL";
         if(equalsAbstractTypeAndValue(input, Types.NAT, "AnyNat")){
-            return getTreeOfAbstractType(new Token(Types.BOOL, "True"));
+            return getTreeOfAbstractType(new Token(Types.BOOL, "T"));
         }else{
-            return getTreeOfAbstractType(new Token(Types.BOOL, "False"));
+            return getTreeOfAbstractType(new Token(Types.BOOL, "F"));
         }
 
     }
@@ -278,11 +279,10 @@ public class Interpreter {
         if(equalsAbstractType(s1, Types.NAT ) && equalsAbstractType(s2, Types.NAT) ) {
             Token tokenS1 = s1.root.token;
             Token tokenS2 = s2.root.token;
-            if ( tokenS1.getType().equals(TokenType.NUMERIC) && tokenS2.getType().equals(TokenType.NUMERIC) &&
-                    tokenS1.getValue().equals(tokenS2.getValue())) {
-                return new BTreeImpl(new Node(new Token<String>(TokenType.LITERAL, "T")));
+            if (tokenS1.getValue().equals(tokenS2.getValue())) {
+                return getTreeOfAbstractType(new Token(Types.BOOL, "T"));
             }else{
-                return new BTreeImpl(new Node(new Token<String>(TokenType.LITERAL, "F")));
+                return getTreeOfAbstractType(new Token(Types.BOOL, "F"));
             }
         }else{
             throw new TypeException("At least one of the input S-Expressions is not of type Nat");
@@ -364,7 +364,7 @@ public class Interpreter {
             Token tokenS2 = s2.root.token;
 //            if ( tokenS1.getType().equals(TokenType.NUMERIC) && tokenS2.getType().equals(TokenType.NUMERIC) &&
 //                    tokenS1.getValue().equals(tokenS2.getValue())) {
-            return new BTreeImpl(new Node(new Token(Types.NAT, "AnyNat")));
+            return new BTreeImpl(new Node(new Token(Types.BOOL, "T")));
 //            }else{
 //                return new BTreeImpl(new Node(new Token<String>(TokenType.LITERAL, "F")));
 //            }
@@ -484,7 +484,7 @@ public class Interpreter {
                     }catch (TypeException e) {
                         throw e;
                     } catch (Exception e) {
-                        e.printStackTrace();
+//                        e.printStackTrace();
                         throw new TypeException(e.getCause().toString().substring(e.getCause().toString().indexOf(":") + 1));
                     }
                 } else {
@@ -539,9 +539,9 @@ public class Interpreter {
 
             Node root = input.root;
             if (isTokenT(root.token) ){
-                return getTreeOfAbstractType(new Token(Types.BOOL, "True"));
+                return getTreeOfAbstractType(new Token(Types.BOOL, "T"));
             }else if( isTokenF(root.token)){
-                return getTreeOfAbstractType(new Token(Types.BOOL, "False"));
+                return getTreeOfAbstractType(new Token(Types.BOOL, "F"));
             }else if( isTokenNIL(root.token)){
                 return getTreeOfAbstractType(new Token(Types.LISTOFNATS, 0));
             }else if(isTokenT(int_(input).root.token)) {
@@ -565,8 +565,19 @@ public class Interpreter {
                     return (BTreeImpl) method.invoke(this, s1, s2);
                 } catch (TypeException e) {
                     throw e;
+                }catch (ListException e){
+                    throw e;
                 } catch (Exception e) {
-                    throw new TypeException(e.getCause().toString().substring(e.getCause().toString().indexOf(":") + 1));
+                    if(e instanceof InvocationTargetException){
+
+                        if(((InvocationTargetException) e).getTargetException() instanceof ListException){
+                            throw new ListException(((ListException) ((InvocationTargetException) e).getTargetException()).message);
+                        }else{
+                            throw new TypeException(((TypeException) ((InvocationTargetException) e).getTargetException()).message);
+                        }
+
+                    }
+                    throw new Exception(e.getCause().toString());
                 }
             } else {
                 throw new TypeException("Expected S-Expression to contain exactly 3 tokens");
@@ -586,8 +597,19 @@ public class Interpreter {
                     return (BTreeImpl) method.invoke(this, s1);
                 }catch (TypeException e) {
                     throw e;
-                } catch (Exception e) {
-                    throw new TypeException(e.getCause().toString().substring(e.getCause().toString().indexOf(":") + 1));
+                }catch (ListException e){
+                    throw e;
+                }catch (Exception e) {
+                    if(e instanceof InvocationTargetException){
+
+                        if(((InvocationTargetException) e).getTargetException() instanceof ListException){
+                            throw new ListException(((ListException) ((InvocationTargetException) e).getTargetException()).message);
+                        }else{
+                            throw new TypeException(((TypeException) ((InvocationTargetException) e).getTargetException()).message);
+                        }
+
+                    }
+                    throw new Exception(e.getCause().toString());
                 }
             } else {
                 throw new TypeException("Expected S-Expression to contain 2 tokens");
@@ -638,7 +660,8 @@ public class Interpreter {
 //                intrprtr.prettyPrint(dash);
             }
         }catch (Exception e){
-            e.printStackTrace();
+            System.out.println(e);
+//            e.printStackTrace();
         }
 
 
